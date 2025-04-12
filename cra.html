@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeCraft - AI Code Review Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #94a3b8;
+            --gray-dark: #64748b;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --code-bg: #1e1e2d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .logo img {
+            height: 32px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .hero {
+            padding: 80px 0;
+            text-align: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--dark);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--gray-dark);
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+
+        .hero-image {
+            max-width: 800px;
+            margin: 40px auto 0;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .features {
+            padding: 80px 0;
+            background-color: white;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: 15px;
+        }
+
+        .section-title p {
+            font-size: 1.1rem;
+            color: var(--gray-dark);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background-color: var(--light);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .feature-card p {
+            color: var(--gray-dark);
+        }
+
+        .code-review-section {
+            padding: 80px 0;
+            background-color: #f8fafc;
+        }
+
+        .review-container {
+            display: flex;
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .code-editor {
+            flex: 1;
+            background-color: var(--code-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .editor-header {
+            background-color: #2d2d3a;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .editor-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--gray);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .editor-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .editor-btn.red {
+            background-color: #ff5f56;
+        }
+
+        .editor-btn.yellow {
+            background-color: #ffbd2e;
+        }
+
+        .editor-btn.green {
+            background-color: #27c93f;
+        }
+
+        .code-area {
+            width: 100%;
+            height: 400px;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #f8f8f2;
+            background-color: var(--code-bg);
+            border: none;
+            resize: none;
+            outline: none;
+            tab-size: 4;
+        }
+
+        .review-results {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .review-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .review-card h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .review-card h3 i {
+            font-size: 1rem;
+        }
+
+        .review-card.success h3 {
+            color: var(--success);
+        }
+
+        .review-card.warning h3 {
+            color: var(--warning);
+        }
+
+        .review-card.error h3 {
+            color: var(--error);
+        }
+
+        .review-card p {
+            color: var(--gray-dark);
+            margin-bottom: 10px;
+        }
+
+        .review-card ul {
+            padding-left: 20px;
+            color: var(--gray-dark);
+        }
+
+        .review-card li {
+            margin-bottom: 5px;
+        }
+
+        .review-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .review-btn {
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .review-btn i {
+            font-size: 1rem;
+        }
+
+        .review-btn.analyze {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .review-btn.analyze:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .review-btn.clear {
+            background-color: var(--light);
+            color: var(--gray-dark);
+        }
+
+        .review-btn.clear:hover {
+            background-color: #e2e8f0;
+        }
+
+        .testimonials {
+            padding: 80px 0;
+            background-color: white;
+        }
+
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .testimonial-card {
+            background-color: var(--light);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .testimonial-card .quote {
+            font-size: 1.1rem;
+            color: var(--dark);
+            font-style: italic;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .author-info h4 {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .author-info p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .pricing {
+            padding: 80px 0;
+            background-color: #f8fafc;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .pricing-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 40px 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .pricing-card.popular {
+            border: 2px solid var(--primary);
+            position: relative;
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .pricing-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .price {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .price span {
+            font-size: 1rem;
+            color: var(--gray);
+            font-weight: 400;
+        }
+
+        .pricing-features {
+            margin-bottom: 30px;
+        }
+
+        .pricing-features li {
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+            color: var(--gray-dark);
+        }
+
+        .pricing-features li:last-child {
+            border-bottom: none;
+        }
+
+        .pricing-btn {
+            width: 100%;
+            padding: 12px 0;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .pricing-btn.primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .pricing-btn.primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .pricing-btn.outline {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .pricing-btn.outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .faq {
+            padding: 80px 0;
+            background-color: white;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 50px auto 0;
+        }
+
+        .faq-item {
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 20px;
+            background-color: var(--light);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .faq-question:hover {
+            background-color: #e2e8f0;
+        }
+
+        .faq-question i {
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-question i {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s, padding 0.3s;
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 20px;
+            max-height: 500px;
+        }
+
+        .faq-answer p {
+            color: var(--gray-dark);
+        }
+
+        .cta {
+            padding: 100px 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .cta p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .cta-btn {
+            padding: 15px 30px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .cta-btn.primary {
+            background-color: white;
+            color: var(--primary);
+            border: none;
+        }
+
+        .cta-btn.primary:hover {
+            background-color: #f1f5f9;
+        }
+
+        .cta-btn.secondary {
+            background-color: transparent;
+            color: white;
+            border: 1px solid white;
+        }
+
+        .cta-btn.secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 60px 0 20px;
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .footer-logo img {
+            height: 32px;
+        }
+
+        .footer-about p {
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+
+        .social-link:hover {
+            background-color: var(--primary);
+        }
+
+        .footer-links h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: var(--gray);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .footer-newsletter p {
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+
+        .newsletter-form {
+            display: flex;
+        }
+
+        .newsletter-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 6px 0 0 6px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+        }
+
+        .newsletter-btn {
+            padding: 0 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .newsletter-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 992px) {
+            .review-container {
+                flex-direction: column;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2103/2103633.png" alt="CodeCraft Logo">
+                    <span>CodeCraft</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#review">Code Review</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="#faq">FAQ</a>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn btn-outline">Login</button>
+                    <button class="btn btn-primary">Sign Up</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>AI-Powered Code Review Assistant</h1>
+            <p>Improve your code quality, catch bugs early, and learn best practices with our intelligent code review assistant. Perfect for developers of all skill levels.</p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" onclick="window.location.href='dro.html'">Try It Free</button>
+                <button class="btn btn-outline">See Demo</button>
+            </div>
+            <div class="hero-image">
+                <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Code Review Interface">
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>Powerful Features</h2>
+                <p>Our code review assistant comes packed with everything you need to write better, cleaner, and more efficient code.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bug"></i>
+                    </div>
+                    <h3>Bug Detection</h3>
+                    <p>Automatically identify potential bugs and errors in your code before they cause problems in production.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background-color: var(--secondary);">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Security Analysis</h3>
+                    <p>Detect security vulnerabilities and suggest fixes to protect your applications from potential threats.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background-color: var(--success);">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3>Code Quality</h3>
+                    <p>Improve your code quality with suggestions on best practices, performance optimizations, and maintainability.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background-color: var(--error);">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3>Smart Suggestions</h3>
+                    <p>Get intelligent recommendations for refactoring and alternative implementations based on industry standards.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background-color: #8b5cf6;">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <h3>Multi-Language</h3>
+                    <p>Supports all major programming languages including JavaScript, Python, Java, C++, and more.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background-color: #ec4899;">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3>Learning Resources</h3>
+                    <p>Access to curated learning materials and explanations to help you understand and fix issues.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="code-review-section" id="review">
+        <div class="container">
+            <div class="section-title">
+                <h2>Interactive Code Review</h2>
+                <p>Paste your code below and get instant feedback on improvements, bugs, and security issues.</p>
+            </div>
+            <div class="review-container">
+                <div class="code-editor">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <i class="fab fa-js"></i>
+                            <span>example.js</span>
+                        </div>
+                        <div class="editor-actions">
+                            <div class="editor-btn red"></div>
+                            <div class="editor-btn yellow"></div>
+                            <div class="editor-btn green"></div>
+                        </div>
+                    </div>
+                    <textarea class="code-area" id="code-input" placeholder="Paste your code here...">function calculateTotal(items) {
+  let total = 0;
+  for (let i = 0; i < items.length; i++) {
+    total += items[i].price;
+  }
+  return total;
+}
+
+function getUserData(userId) {
+  return fetch(`/api/users/${userId}`)
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      return data;
+    });
+}
+
+class User {
+  constructor(name, email) {
+    this.name = name;
+    this.email = email;
+  }
+
+  sendEmail(subject, message) {
+    // Send email logic here
+  }
+}</textarea>
+                </div>
+                <div class="review-results">
+                    <div class="review-card success">
+                        <h3><i class="fas fa-check-circle"></i> Code Structure</h3>
+                        <p>Your code is well-organized with clear functions and a class definition. The indentation and formatting are consistent.</p>
+                    </div>
+                    <div class="review-card warning">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Potential Issues</h3>
+                        <ul>
+                            <li>The <code>calculateTotal</code> function doesn't handle cases where items might be undefined or null.</li>
+                            <li>The <code>getUserData</code> function lacks error handling for failed API requests.</li>
+                            <li>Consider adding input validation in the <code>User</code> class constructor.</li>
+                        </ul>
+                    </div>
+                    <div class="review-card">
+                        <h3><i class="fas fa-info-circle"></i> Suggestions</h3>
+                        <ul>
+                            <li>Consider using <code>Array.reduce()</code> for the <code>calculateTotal</code> function for more concise code.</li>
+                            <li>Add error handling with <code>try/catch</code> for the <code>getUserData</code> function.</li>
+                            <li>For the <code>User</code> class, consider adding input validation and making properties private.</li>
+                        </ul>
+                    </div>
+                    <div class="review-actions">
+                        <button class="review-btn analyze" id="analyze-btn">
+                            <i class="fas fa-search"></i> Analyze Code
+                        </button>
+                        <button class="review-btn clear" id="clear-btn">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-title">
+                <h2>What Developers Say</h2>
+                <p>Join thousands of developers who improved their code quality with our assistant.</p>
+            </div>
+            <div class="testimonial-grid">
+                <div class="testimonial-card">
+                    <p class="quote">"CodeCraft has transformed how I write code. The suggestions are spot-on and have helped me catch bugs before they made it to production."</p>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Sarah Johnson" class="author-avatar">
+                        <div class="author-info">
+                            <h4>Sarah Johnson</h4>
+                            <p>Senior Developer, TechCorp</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="quote">"As a junior developer, this tool has been invaluable for learning best practices and improving my code quality quickly."</p>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Michael Chen" class="author-avatar">
+                        <div class="author-info">
+                            <h4>Michael Chen</h4>
+                            <p>Frontend Developer, StartupX</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="quote">"The security analysis feature alone is worth the price. It's helped us identify vulnerabilities we didn't even know existed."</p>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Emma Rodriguez" class="author-avatar">
+                        <div class="author-info">
+                            <h4>Emma Rodriguez</h4>
+                            <p>CTO, SecureApp</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="section-title">
+                <h2>Simple, Transparent Pricing</h2>
+                <p>Choose the plan that fits your needs. No hidden fees, cancel anytime.</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Starter</h3>
+                    <div class="price">$0<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li>Basic code analysis</li>
+                        <li>5 reviews per day</li>
+                        <li>JavaScript & Python support</li>
+                        <li>Community support</li>
+                    </ul>
+                    <button class="pricing-btn outline">Get Started</button>
+                </div>
+                <div class="pricing-card popular">
+                    <div class="popular-badge">Most Popular</div>
+                    <h3>Professional</h3>
+                    <div class="price">$19<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li>Advanced code analysis</li>
+                        <li>Unlimited reviews</li>
+                        <li>All language support</li>
+                        <li>Security vulnerability detection</li>
+                        <li>Priority support</li>
+                    </ul>
+                    <button class="pricing-btn primary">Get Professional</button>
+                </div>
+                <div class="pricing-card">
+                    <h3>Team</h3>
+                    <div class="price">$49<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li>Everything in Professional</li>
+                        <li>Up to 5 team members</li>
+                        <li>Team collaboration features</li>
+                        <li>Shared review history</li>
+                        <li>Dedicated account manager</li>
+                    </ul>
+                    <button class="pricing-btn outline">Get Team</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq" id="faq">
+        <div class="container">
+            <div class="section-title">
+                <h2>Frequently Asked Questions</h2>
+                <p>Find answers to common questions about our code review assistant.</p>
+            </div>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>What programming languages do you support?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>We currently support JavaScript, TypeScript, Python, Java, C#, C++, PHP, Ruby, and Go. We're continuously adding support for more languages based on user demand.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How does the code analysis work?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Our system uses static code analysis combined with machine learning to identify patterns, potential bugs, security vulnerabilities, and areas for improvement. The analysis is based on industry best practices and common pitfalls.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Is my code stored or used for training?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>No, we don't store your code or use it for training our models unless you explicitly opt-in to share anonymized snippets to help improve our service. Your code privacy is our top priority.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Can I use this for commercial projects?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Absolutely! All our plans can be used for both personal and commercial projects. The Team plan is specifically designed for professional and enterprise use.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How do I cancel my subscription?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>You can cancel anytime from your account settings. There are no cancellation fees, and you'll continue to have access until the end of your billing period.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <div class="container">
+            <h2>Ready to Improve Your Code?</h2>
+            <p>Join thousands of developers who are writing better code with our AI-powered review assistant.</p>
+            <div class="cta-buttons">
+                <button class="cta-btn primary">Get Started for Free</button>
+                <button class="cta-btn secondary">Schedule a Demo</button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-about">
+                    <div class="footer-logo">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2103/2103633.png" alt="CodeCraft Logo">
+                        <span>CodeCraft</span>
+                    </div>
+                    <p>AI-powered code review assistant helping developers write better, cleaner, and more secure code.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h3>Product</h3>
+                    <ul>
+                        <li><a href="#">Features</a></li>
+                        <li><a href="#">Pricing</a></li>
+                        <li><a href="#">Integrations</a></li>
+                        <li><a href="#">Roadmap</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Tutorials</a></li>
+                        <li><a href="#">API</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h3>Company</h3>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-newsletter">
+                    <h3>Stay Updated</h3>
+                    <p>Subscribe to our newsletter for product updates and coding tips.</p>
+                    <form class="newsletter-form">
+                        <input type="email" class="newsletter-input" placeholder="Your email">
+                        <button type="submit" class="newsletter-btn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 CodeCraft. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Toggle FAQ items
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const item = question.parentElement;
+                item.classList.toggle('active');
+                
+                // Close other open items
+                document.querySelectorAll('.faq-item').forEach(otherItem => {
+                    if (otherItem !== item && otherItem.classList.contains('active')) {
+                        otherItem.classList.remove('active');
+                    }
+                });
+            });
+        });
+
+        // Code review functionality
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const codeInput = document.getElementById('code-input');
+
+        analyzeBtn.addEventListener('click', () => {
+            const code = codeInput.value.trim();
+            if (!code) {
+                alert('Please enter some code to analyze');
+                return;
+            }
+            
+            // Simulate analysis (in a real app, this would call an API)
+            analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+            analyzeBtn.disabled = true;
+            
+            setTimeout(() => {
+                analyzeBtn.innerHTML = '<i class="fas fa-search"></i> Analyze Code';
+                analyzeBtn.disabled = false;
+                
+                // In a real app, you would update the review cards with actual analysis results
+                alert('Code analysis complete! See the review cards for suggestions.');
+            }, 1500);
+        });
+
+        clearBtn.addEventListener('click', () => {
+            codeInput.value = '';
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Mobile menu toggle (would be added if implementing mobile menu)
+        // This is a placeholder for potential mobile menu functionality
+    </script>
+</body>
+</html>

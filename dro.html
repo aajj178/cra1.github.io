@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CodeCraft Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      display: flex;
+      height: 100vh;
+      background: linear-gradient(135deg, #1d0145, #21052f);
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: rgba(0, 0, 0, 0.3);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      transition: width 0.3s ease;
+      overflow: hidden;
+    }
+
+    .sidebar.collapsed {
+      width: 70px;
+      align-items: center;
+    }
+
+    .sidebar .logo,
+    .sidebar h2,
+    .sidebar .history-item,
+    .sidebar .account,
+    .sidebar button:not(.toggle-btn) {
+      transition: opacity 0.3s, transform 0.3s;
+      white-space: nowrap;
+    }
+
+    .sidebar.collapsed .logo span.name,
+    .sidebar.collapsed h2,
+    .sidebar.collapsed .history-item,
+    .sidebar.collapsed .account,
+    .sidebar.collapsed button:not(.toggle-btn) {
+      opacity: 0;
+      transform: scale(0.9);
+      pointer-events: none;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    .sidebar.collapsed .logo {
+      justify-content: center;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 5px;
+      transition: transform 0.3s;
+    }
+
+    .sidebar.collapsed .toggle-btn {
+      margin-left: 0;
+      transform: rotate(180deg);
+    }
+
+    h2 {
+      font-size: 16px;
+      margin-top: 20px;
+      margin-bottom: 5px;
+    }
+
+    .history-item {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 5px;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .main {
+      flex: 1;
+      padding: 30px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .examples {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .example-card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: 0.3s;
+    }
+
+    .example-card:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+    }
+
+    .chatbox {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 20px;
+    }
+
+    .chat-message {
+      margin-bottom: 15px;
+    }
+
+    .chat-message pre {
+      background: #1e1e3f;
+      padding: 10px;
+      border-radius: 10px;
+      overflow-x: auto;
+    }
+
+    .input-area {
+      display: flex;
+      background: #2b2b3f;
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    textarea {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: #fff;
+      font-size: 16px;
+      padding: 10px;
+      height: 80px;
+      resize: none;
+    }
+
+    textarea:focus {
+      outline: none;
+    }
+
+    button:not(.toggle-btn) {
+      background: #a100ff;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-left: 10px;
+      transition: background 0.3s ease;
+    }
+
+    button:not(.toggle-btn):hover {
+      background: #d14eff;
+    }
+
+    .account {
+      font-size: 13px;
+      margin-top: auto;
+    }
+
+    .account small {
+      display: block;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <div class="logo">
+      <span class="name">CodeCraft</span>
+      <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+    </div>
+    <div>
+      <h2>New Chat</h2>
+      <button onclick="startNewChat()">+ Start</button>
+    </div>
+    <div>
+      <h2>History</h2>
+      <div id="historyList"></div>
+    </div>
+    <div class="account">
+      <h2>Account</h2>
+      @you
+      <small>Settings / Logout</small>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="header">
+      <h1>CodeCraft Assistant</h1>
+      <p>Your intelligent AI reviewer for clean and efficient code.</p>
+    </div>
+
+    <div class="examples">
+      <div class="example-card" onclick="setExample('Review my C++ function')">Review my C++ function</div>
+      <div class="example-card" onclick="setExample('Explain this Python error')">Explain this Python error</div>
+      <div class="example-card" onclick="setExample('Optimize this Java code')">Optimize Java code</div>
+      <div class="example-card" onclick="setExample('Detect security flaws')">Detect security flaws</div>
+    </div>
+
+    <div class="chatbox" id="chatLog"></div>
+
+    <div class="input-area">
+      <textarea id="userInput" placeholder="Paste code or ask a question..."></textarea>
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const history = [];
+    let isSidebarCollapsed = false;
+    
+    const reviewStatements = [
+      "Your code structure is excellent! To make it even better, consider adding comments above complex logic blocks to explain their purpose and approach.",
+      "Great use of functions! For maintainability, please add docstrings that explain each function's purpose, parameters, and return values.",
+      "The algorithm works well! To help other developers, add comments explaining why you chose this particular approach and any alternatives you considered.",
+      "Good variable naming! For complex calculations, add inline comments explaining the mathematical operations or business logic being implemented.",
+      "The error handling is robust! Add comments explaining what specific errors you're guarding against and why they're important to handle.",
+      "Nice code organization! Consider adding a header comment at the top of each file explaining its overall purpose and key components.",
+      "The performance optimizations are effective! Add comments explaining any trade-offs you made between readability and performance.",
+      "Good separation of concerns! Add comments at the module level explaining how different components interact with each other.",
+      "The code follows good practices! To complete it, add comments explaining any non-obvious design decisions or constraints you worked with.",
+      "Excellent implementation! Add comments explaining any workarounds for platform-specific issues or third-party library limitations."
+    ];
+
+    function getRandomReviewStatement() {
+      return reviewStatements[Math.floor(Math.random() * reviewStatements.length)];
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      isSidebarCollapsed = !isSidebarCollapsed;
+      sidebar.classList.toggle("collapsed", isSidebarCollapsed);
+      
+      localStorage.setItem('sidebarCollapsed', isSidebarCollapsed);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedState = localStorage.getItem('sidebarCollapsed');
+      if (savedState === 'true') {
+        toggleSidebar();
+      }
+    });
+
+    function setExample(text) {
+      document.getElementById("userInput").value = text;
+    }
+
+    function startNewChat() {
+      document.getElementById("chatLog").innerHTML = '';
+      document.getElementById("userInput").value = '';
+    }
+
+    function updateHistory(prompt) {
+      history.unshift(prompt);
+      const historyList = document.getElementById("historyList");
+      historyList.innerHTML = '';
+      history.slice(0, 10).forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'history-item';
+        el.textContent = item.length > 30 ? item.slice(0, 30) + "..." : item;
+        el.onclick = () => {
+          document.getElementById("userInput").value = item;
+        };
+        historyList.appendChild(el);
+      });
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const chatLog = document.getElementById("chatLog");
+      const userText = input.value.trim();
+      if (!userText) return;
+
+      updateHistory(userText);
+
+      const userMsg = document.createElement("div");
+      userMsg.className = "chat-message";
+      userMsg.innerHTML = `<strong>You:</strong><pre>${userText}</pre>`;
+      chatLog.appendChild(userMsg);
+
+      const botMsg = document.createElement("div");
+      botMsg.className = "chat-message";
+      
+      const randomStatement = getRandomReviewStatement();
+      botMsg.innerHTML = `<strong>Assistant:</strong><pre>${randomStatement}</pre>`;
+      chatLog.appendChild(botMsg);
+
+      chatLog.scrollTop = chatLog.scrollHeight;
+      input.value = "";
+
+      try {
+        // Backend integration can be added here if needed
+      } catch (error) {
+        botMsg.innerHTML = `<strong>Assistant:</strong><pre>Error: ${error.message}</pre>`;
+      }
+
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+  </script>
+</body>
+</html>
